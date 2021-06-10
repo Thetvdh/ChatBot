@@ -3,12 +3,15 @@
 import sys
 import databasemgmt
 import usermgmt
+import externalcmds
 import string
 from datetime import datetime
 
+DEBUG = True
 # user = usermgmt.User("Test", "Acc", 17, "male", "TestAcc", "TestAcc") SYNTAX FOR CREATING USER OBJECT
 version = 2
 capabilities = ['Conversation', 'Commands', 'Searching']
+degree = str(b'\xc2\xb0', 'utf8')
 
 
 def add_new_user():
@@ -50,7 +53,7 @@ def login():  # basic login system
             print("Invalid password!!")
 
 
-def print_menu():  # Print menu for Pycharm Run TODO build menu for terminal
+def print_menu_pycharm():  # Print menu for Pycharm Run TODO build menu for terminal
     print(f"#############################\n"
           f"#\t\t CHATBOT V{version} \t\t#\n"
           f"#############################\n"
@@ -61,6 +64,29 @@ def print_menu():  # Print menu for Pycharm Run TODO build menu for terminal
           f"#############################\n")
 
 
+def print_menu_console():
+    print(f"#############################\n"
+          f"#\t CHATBOT V{version}\t    #\n"
+          f"#############################\n"
+          f"# (1)\t Add User\t    #\n"
+          f"# (2)\t Login \t\t    #\n"
+          f"# (3)\t Admin \t\t    #\n"
+          f"# (4)\t Exit \t\t    #\n"
+          f"#############################\n")
+
+
+def weather_interface():
+    weather = weather_controller.get_today_weather()
+    return f'''{weather[1]} 
+with a maximum temperature of {weather[4]}{degree}C and a low of {weather[3]}{degree}C'''
+
+
+def wiki_interface(term):
+    page = externalcmds.WikiAccess.get_wiki_page(term)
+    summary = externalcmds.WikiAccess.summary_pedia(term, 2)
+    return page, summary
+
+
 def parse_input(session, user_input_list, raw_user_input):
     stand_greetings = {"hello": f"Hello {session.firstname}, how are you today?",
                        "fine": "That's good. How about you ask me some questions!",
@@ -69,21 +95,35 @@ def parse_input(session, user_input_list, raw_user_input):
                        "my name": f"Your name is {session.firstname}! Or so you told me..."}
     questions = {"what is your name": f"My name is {session.bot_name}",
                  "whats your name": f"My name is {session.bot_name}",
-                 "whats the time": f"The time is {datetime.now().strftime('%H:%M:%S')}"}
+                 "whats the time": f"The time is {datetime.now().strftime('%H:%M:%S')}",
+                 "whats the weather like": f"The weather today is {weather_interface()}",
+                 }
+    if "who is" in raw_user_input or "what is" in raw_user_input:
+        term = ""
+        for word in user_input_list:
+            if word == "who" or word == "what" or word == "is":
+                continue
+            else:
+                term = term + word + " "
 
-    for item in user_input_list:
+        page, summary = wiki_interface(term)
+        print(f"{summary}\n{page.url}")
+        return True
+    else:
+        for item in user_input_list:
+            for key, value in stand_greetings.items():
+                if item in key:
+                    print(value)
+                    return True
         for key, value in stand_greetings.items():
-            if item in key:
+            if raw_user_input in key:
                 print(value)
                 return True
-    for key, value in stand_greetings.items():
-        if raw_user_input in key:
-            print(value)
-            return True
-    for key, value in questions.items():
-        if raw_user_input in key:
-            print(value)
-            return True
+        for key, value in questions.items():
+            if raw_user_input in key:
+                print(value)
+                return True
+
 
 def main(session):
     session.establish_pronouns()
@@ -128,31 +168,39 @@ def main(session):
 def menu():
     valid = False
     while not valid:
-        print_menu()
-        choice = int(input("Enter a choice "))
-        if choice == 1:
-            new_user = add_new_user()
-            if manager.insert_user(new_user):
-                print("New user has been successfully created. Please login!")
-        elif choice == 2:
-            session = login()
-            print("Logged in successfully")
-            main(session)
-            print("Main Ended")  # TODO remove debugging
-            manager.close_connection()
-            sys.exit(0)
-        elif choice == 3:
-            valid = True
-        elif choice == 4:
-            print("Goodbye!!")
-            sys.exit(0)
-        elif choice == 5:
-            print("Well done you discovered the secret!!")
-            sys.exit(0)
-        else:
-            print("Invalid option. Please choose an option from the menu")
+        try:
+            if DEBUG:
+                print_menu_pycharm()
+            else:
+                print_menu_console()
+            choice = int(input("Enter a choice "))
+            if choice == 1:
+                new_user = add_new_user()
+                if manager.insert_user(new_user):
+                    print("New user has been successfully created. Please login!")
+            elif choice == 2:
+                session = login()
+                print("Logged in successfully")
+                main(session)
+                print("Main Ended")  # TODO remove debugging
+                manager.close_connection()
+                sys.exit(0)
+            elif choice == 3:
+                valid = True
+            elif choice == 4:
+                print("Goodbye!!")
+                sys.exit(0)
+            elif choice == 5:
+                print("Well done you discovered the secret!!")
+                sys.exit(0)
+            else:
+                print("Invalid option. Please choose an option from the menu")
+        except ValueError:
+            print("Please enter a number and try again")
 
 
 if __name__ == '__main__':
     manager = databasemgmt.DatabaseManager("project.db")
+    weather_controller = externalcmds.Weather()
+    wiki_controller = externalcmds.WikiAccess()
     menu()
