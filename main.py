@@ -3,11 +3,12 @@
 import sys
 import databasemgmt
 import usermgmt
+import string
+from datetime import datetime
 
 # user = usermgmt.User("Test", "Acc", 17, "male", "TestAcc", "TestAcc") SYNTAX FOR CREATING USER OBJECT
 version = 2
 capabilities = ['Conversation', 'Commands', 'Searching']
-stand_greetings = {}
 
 
 def add_new_user():
@@ -30,7 +31,7 @@ def add_new_user():
     return user
 
 
-def login(): # basic login system
+def login():  # basic login system
     username_valid = False
     password_valid = False
     username = ""
@@ -49,7 +50,7 @@ def login(): # basic login system
             print("Invalid password!!")
 
 
-def print_menu():
+def print_menu():  # Print menu for Pycharm Run TODO build menu for terminal
     print(f"#############################\n"
           f"#\t\t CHATBOT V{version} \t\t#\n"
           f"#############################\n"
@@ -60,9 +61,34 @@ def print_menu():
           f"#############################\n")
 
 
+def parse_input(session, user_input_list, raw_user_input):
+    stand_greetings = {"hello": f"Hello {session.firstname}, how are you today?",
+                       "fine": "That's good. How about you ask me some questions!",
+                       "good": "That's good. How about you ask me some questions!",
+                       "how are you": "I am a robot. I am always fine",
+                       "my name": f"Your name is {session.firstname}! Or so you told me..."}
+    questions = {"what is your name": f"My name is {session.bot_name}",
+                 "whats your name": f"My name is {session.bot_name}",
+                 "whats the time": f"The time is {datetime.now().strftime('%H:%M:%S')}"}
+
+    for item in user_input_list:
+        for key, value in stand_greetings.items():
+            if item in key:
+                print(value)
+                return True
+    for key, value in stand_greetings.items():
+        if raw_user_input in key:
+            print(value)
+            return True
+    for key, value in questions.items():
+        if raw_user_input in key:
+            print(value)
+            return True
+
 def main(session):
     session.establish_pronouns()
-    if session.bot_name is None: # runs if no bot name
+
+    if session.bot_name is None:  # runs if no bot name
         print(f"Hello {session.firstname}, I am Chatbot V1! However, I understand that is quite formal so...")
         refer_name = input("What would you like to call me? ")
         session.bot_name = refer_name
@@ -79,22 +105,24 @@ def main(session):
         for capability in capabilities:
             print(capability)
         print("To see what advanced features I have, type help and I will tell you what to do next!")
-        print("Well then. Looks like your introduction has finished! To replay this intro, type show introduction\not7"
+        print("Well then. Looks like your introduction has finished! To replay this intro, type show introduction\n"
               "and I will replay it for you!")
         session.first_time = 0
-        manager.first_time_complete(session.username) # sets first time to false
+        manager.first_time_complete(session.username)  # sets first time to false
     print(f"Welcome, {session.firstname}")
-    while True: # game loop
+    while True:  # game loop
         user_input = input().lower()
+        user_input = user_input.translate(str.maketrans('', '', string.punctuation))
         user_input_list = user_input.split(" ")
         if user_input_list[0] == "help" or user_input_list[0] == "show" or user_input_list[0] == "set":
             # TODO add the commands in here
             pass
-        elif user_input in stand_greetings.keys():
-            # TODO Do logic to do response
-            pass
         else:
-            print("Sorry I am not too sure what you mean. Try rephrasing it and maybe I can help you!")
+            if parse_input(session, user_input_list, user_input):
+                continue
+            else:
+                print("Sorry I am not too sure what you mean. Try rephrasing it and maybe I can help you!")
+                continue
 
 
 def menu():
