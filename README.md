@@ -31,14 +31,22 @@ If the menu looks dodgy in your terminal. Go into main.py and change DEBUG to Fa
 
 The bot is quite thick and will ignore most things said to it but if you want here is a list of things it can do.
 
- --> Simple greetings
- --> Check weather report in your area (type weather)
- --> Check a wikipedia entry for a person or thing (type what/who is <thing>)
- --> Tell you the current time
+ - Simple greetings
+ - Check weather report in your area (type weather)
+ - Check a wikipedia entry for a person or thing (type what/who is <thing>)
+ - Tell you the current time
+ 
 # TODO
 
-  --> Add password hashing for the database
-  --> Add option to choose where you get the weather report from
-  --> Add ability to change account info such as name, username, and gender
-  --> Implement an Admin command shell where advanced database and bot commands can be executed
-  --> Remove all debugging
+  - Add password hashing for the database
+  - Add option to choose where you get the weather report from
+  - Add ability to change account info such as name, username, and gender
+  - Implement an Admin command shell where advanced database and bot commands can be executed
+  - Remove all debugging
+
+# TO FIX
+ 
+ - For some reason using the Wikipedia search for the term "Elon Musk" breaks it.
+ - what is the time no longer works due to conflict with wikipedia.
+
+Any suggestions to make my code better will be appriciated.
