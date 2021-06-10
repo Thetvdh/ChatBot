@@ -9,7 +9,7 @@ class DatabaseManager:
         self.cursor = None
         self.establish_connection()
 
-    def establish_connection(self): # connects to db and creates cursor
+    def establish_connection(self):  # connects to db and creates cursor
         try:
             self.connection = sqlite3.connect(self.name)
             self.cursor = self.connection.cursor()
@@ -17,10 +17,10 @@ class DatabaseManager:
         except Exception:
             print("[ERROR] Failed to establish connection with the database")
 
-    def close_connection(self): # closes connection
+    def close_connection(self):  # closes connection
         self.connection.close()
 
-    def create_table(self, tbl_name, **kwargs): # method to create a table. Most likely will not be used again.
+    def create_table(self, tbl_name, **kwargs):  # method to create a table. Most likely will not be used again.
         magic = ""
         for key, value in kwargs.items():
             # print(f"Key is {key} Value is {value}")
@@ -32,7 +32,7 @@ class DatabaseManager:
         self.cursor.execute(sql)
         self.cursor.commit()
 
-    def insert_user(self, user): # adds a user to the db
+    def insert_user(self, user):  # adds a user to the db
         params = (user.firstname, user.lastname, user.age, user.gender, user.username, user.password)
         sql = "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)"
         try:
@@ -43,7 +43,7 @@ class DatabaseManager:
             print("The database is experiencing an issue currently. Please try again later. (Operational Error)")
             return False
 
-    def read_data(self, *args): # reads all data from the users table. Usable by admins when implemented TODO
+    def read_data(self, *args):  # reads all data from the users table. Usable by admins when implemented TODO
         params = tuple(args)
         print(params)  # TODO remove debugging
         sql = "SELECT * FROM users"
@@ -60,7 +60,7 @@ class DatabaseManager:
                 return True
         return False
 
-    def verify_login_details(self, username, password): # checks if the login details are correct
+    def verify_login_details(self, username, password):  # checks if the login details are correct
         # TODO check if any password in the db can log into any account
         sql = "SELECT username, password FROM users WHERE username=:username"
         self.cursor.execute(sql, {"username": username})
@@ -70,12 +70,12 @@ class DatabaseManager:
             self.cursor.execute(sql, {"username": username})
             data = self.cursor.fetchone()
             print(data)  # TODO remove debugging
-            userobj = usermgmt.User(data[1], data[2], data[3], data[4].lower(), data[5], data[6], data[7], data [8])
+            userobj = usermgmt.User(data[1], data[2], data[3], data[4].lower(), data[5], data[6], data[7], data[8])
             # ^ creates a user object to be established in a session
             return True, userobj
         return False
 
-    def write_bot_name(self, username, bot_name): # adds the bot name to the db when created
+    def write_bot_name(self, username, bot_name):  # adds the bot name to the db when created
         sql = "UPDATE users SET botname=:botname WHERE username=:username"
         self.cursor.execute(sql, {"botname": bot_name, "username": username})
         self.connection.commit()
@@ -86,8 +86,7 @@ class DatabaseManager:
         if data[0] == bot_name:
             return True
 
-    def first_time_complete(self, username): # sets first time to false in db
+    def first_time_complete(self, username):  # sets first time to false in db
         sql = "UPDATE users SET firsttime=0 WHERE username=:username"
         self.cursor.execute(sql, {"username": username})
         self.connection.commit()
-
