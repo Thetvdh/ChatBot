@@ -1,4 +1,4 @@
-# ChatBot
+# ChatBot (Deprecated)
 A python3 based chat bot
 
 
